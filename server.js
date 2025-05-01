@@ -1,0 +1,28 @@
+const express = require("express");
+
+const userRoutes = require("./src/routes/user");
+
+const postRoutes = require("./src/routes/post");
+
+const env = require("dotenv").config();
+
+const { connectMySQL } = require("./src/config/dbconnection");
+
+const app = express();
+
+app.use(express.json());
+
+app.use("/api/user", userRoutes);
+
+app.use("/api/post", postRoutes);
+
+// Simple Route
+app.get('/', (req, res) => {
+    res.send('Hello World!');
+  });
+
+connectMySQL();
+
+app.listen(3001, () => {
+  console.log(`Server is running on port 3001 http://localhost:3001`);
+});
