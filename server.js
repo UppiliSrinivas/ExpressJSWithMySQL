@@ -1,5 +1,7 @@
 const express = require("express");
 
+const env = require("dotenv").config();
+
 const userRoutes = require("./src/routes/user");
 
 const authRoutes = require("./src/routes/auth");
@@ -19,12 +21,14 @@ app.use("/api/auth", authRoutes);
 app.use("/api/post", postRoutes);
 
 // Simple Route
-app.get('/', (req, res) => {
-    res.send('Hello World!');
-  });
+app.get("/", (req, res) => {
+  res.send("Hello World!");
+});
 
 connectMySQL();
 
-app.listen(3001, () => {
-  console.log(`Server is running on port 3001 http://localhost:3001`);
+app.listen(process.env.DB_PORT, () => {
+  console.log(
+    `Server is running on port ${process.env.DB_PORT} http://localhost:${process.env.DB_PORT}`
+  );
 });
