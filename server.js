@@ -2,9 +2,9 @@ const express = require("express");
 
 const userRoutes = require("./src/routes/user");
 
-const postRoutes = require("./src/routes/post");
+const authRoutes = require("./src/routes/auth");
 
-const env = require("dotenv").config();
+const postRoutes = require("./src/routes/post");
 
 const { connectMySQL } = require("./src/config/dbconnection");
 
@@ -13,6 +13,8 @@ const app = express();
 app.use(express.json());
 
 app.use("/api/user", userRoutes);
+
+app.use("/api/auth", authRoutes);
 
 app.use("/api/post", postRoutes);
 

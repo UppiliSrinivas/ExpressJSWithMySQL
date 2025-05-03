@@ -1,67 +1,6 @@
-const bcrypt = require("bcrypt");
-
 const jwt = require("jsonwebtoken");
 
-const nodemailer = require("nodemailer");
-
 const User = require("../models/user");
-
-//login function
-const login = async (req, res) => {
-  const { email, password } = req.body;
-  try {
-    const user = await User.findOne({ where: { email } });
-
-    if (!user) return res.status(404).json({ message: `${email} not found` });
-
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-
-    if (!isPasswordValid)
-      return res.status(401).json({ message: "Invalid password" });
-
-    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
-      expiresIn: "1d",
-    });
-
-    res.status(200).json({
-      message: "Login successful",
-      token,
-    });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: error });
-  }
-};
-
-const register = async (req, res) => {
-  const { name, email, password } = req.body;
-
-  try {
-    const existingUser = await User.findOne({ where: { email } });
-
-    if (existingUser)
-      return res.status(409).json({ message: `${email} already exists` });
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const newUser = await User.create({
-      name,
-      email,
-      password: hashedPassword,
-    });
-
-    res.status(201).json({
-      message: "User created successfully",
-      user: {
-        id: newUser.id,
-        name: newUser.name,
-        email: newUser.email,
-      },
-    });
-  } catch (error) {
-    res.status(500).json({ message: error });
-  }
-};
 
 const fetchAllUsers = async (req, res) => {
   try {
@@ -90,73 +29,68 @@ const fetchAllUsers = async (req, res) => {
   }
 };
 
-const forgotpassword = async (req, res) => {
-  const { email } = req.body;
+const updateUser = async (req, res) => {
+  const { id } = req.params;
+  const { name } = req.body;
+  const token = req.headers["authorization"];
+
+  console.log("Token:", token, "ID:", id, "Name:", name);
+  
 
   try {
-    const user = await User.findOne({ where: { email } });
 
-    if (!user) return res.status(404).json({ message: `${email} not found` });
+    if (!token) return res.status(401).json({ message: "Unauthorized" });
 
-    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
-    });
-
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: "uppilisrinivasanecs@gmail.com",
-        pass: "wxby zgiu jilf vpzs",
-      },
-    });
-
-    const mailOptions = {
-      from: "uppilisrinivasanecs@gmail.com",
-      to: email,
-      subject: "Password Reset",
-      text: `Click the link to reset your password: http://localhost:3031/reset-password/${token}`,
-    };
-
-    await transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.log("Error sending email: ", error);
-        return res.status(500).json({ message: "Error sending email" });
-      } else {
-        console.log("Email sent: " + info.response);
-      }
-    });
-
-    res.status(200).json({
-      message: "Password reset token sent to your email",
-    });
-  } catch (error) {
-    console.log(error);
-    res.status(500).json({ message: error });
-  }
-};
-
-const resetPassword = (req, res) => {
-  const { token, newPassword } = req.body;
-  try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     if (!decoded) return res.status(401).json({ message: "Unauthorized" });
 
-    const hashedPassword = bcrypt.hashSync(newPassword, 10);
+    const user = await User.findByPk(id);
 
-    User.update({ password: hashedPassword }, { where: { id: decoded.id } });
+    if (!user) return res.status(404).json({ message: "User not found" });
 
-    res.status(200).json({ message: "Password reset successfully" });
+    await user.update({ name });
+
+    res.status(200).json({
+      message: "User updated successfully",
+      user: {
+        id: user.id,
+        name: user.name
+      },
+    });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ message: error });
+    res.status(500).json({ error: "Something went wrong" });
+  }
+};
+
+const deleteUser = async (req, res) => {
+  const { id } = req.params;
+  const token = req.headers["authorization"];
+
+  try {
+
+    if (!token) return res.status(401).json({ message: "Unauthorized" });
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    if (!decoded) return res.status(401).json({ message: "Unauthorized" });
+
+    const user = await User.findByPk(id);
+
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    await user.destroy();
+
+    res.status(200).json({ message: "User deleted successfully" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Something went wrong" });
   }
 };
 
 module.exports = {
-  login,
-  register,
   fetchAllUsers,
-  forgotpassword,
-  resetPassword,
+  updateUser,
+  deleteUser,
 };

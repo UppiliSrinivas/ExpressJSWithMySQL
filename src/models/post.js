@@ -18,14 +18,6 @@ const Post = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: false,
     },
-    authorId: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: {
-        model: process.env.USER_TB,
-        key: "id",
-      },
-    },
     likes: {
       type: DataTypes.INTEGER,
       defaultValue: 0,
@@ -37,6 +29,8 @@ const Post = sequelize.define(
         model: process.env.USER_TB,
         key: "id",
       },
+      onDelete: "CASCADE",
+      onUpdate: "CASCADE",
     }
   },
   {
