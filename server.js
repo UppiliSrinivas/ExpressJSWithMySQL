@@ -27,8 +27,8 @@ app.get("/", (req, res) => {
 
 connectMySQL();
 
-app.listen(3306, () => {
+app.listen(process.env.DB_PORT, () => {
   console.log(
-    `Server is running on port 3306 http://localhost:3306`
+    `Server is running on port ${process.env.DB_PORT} http://${process.env.DB_HOST}:${process.env.DB_PORT}`
   );
 });
