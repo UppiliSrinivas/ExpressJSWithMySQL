@@ -4,7 +4,6 @@ const cors = require('cors');
 
 const env = require("dotenv").config();
 
-app.use(cors());  // Enables CORS for all routes
 
 const userRoutes = require("./src/routes/user");
 
@@ -15,6 +14,8 @@ const postRoutes = require("./src/routes/post");
 const { connectMySQL } = require("./src/config/dbconnection");
 
 const app = express();
+
+app.use(cors());  // Enables CORS for all routes
 
 app.use(express.json());
 
