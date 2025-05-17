@@ -15,8 +15,6 @@ const { connectMySQL } = require("./src/config/dbconnection");
 
 const app = express();
 
-app.use(cors());  // Enables CORS for all routes
-
 app.use(express.json());
 
 app.use("/api/user", userRoutes);
