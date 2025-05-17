@@ -6,6 +6,24 @@ const nodemailer = require("nodemailer");
 
 const User = require("../models/user");
 
+const validateToken = (req, res, next) => {
+  const token = req.headers["authorization"];
+
+  try {
+    if (!token) return res.status(401).json({ message: "Unauthorized" });
+
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+      if (err) return res.status(401).json({ message: "Unauthorized" });
+
+      req.userId = decoded.id;
+
+      next();
+    });
+  } catch (error) {
+    return res.status(500).json({ message: "Something went wrong" });
+  }
+};
+
 //login function
 const login = async (req, res) => {
   const { email, password } = req.body;
@@ -131,4 +149,5 @@ module.exports = {
   register,
   forgotpassword,
   resetPassword,
+  validateToken,
 };

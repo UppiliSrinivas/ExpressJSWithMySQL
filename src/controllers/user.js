@@ -4,17 +4,6 @@ const User = require("../models/user");
 
 const fetchAllUsers = async (req, res) => {
   try {
-    const token = req.headers["authorization"];
-
-    if (!token) return res.status(401).json({ message: "Unauthorized" });
-
-    // Remove "Bearer " from the token
-    const tokenWithoutBearer = token.replaceAll("Bearer ", "");
-
-    const decoded = jwt.verify(tokenWithoutBearer, process.env.JWT_SECRET);
-
-    if (!decoded) return res.status(401).json({ message: "Unauthorized" });
-
     const users = await User.findAll({
       attributes: ["id", "name", "email"],
     });
